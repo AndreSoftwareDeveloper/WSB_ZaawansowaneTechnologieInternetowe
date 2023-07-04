@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Price Tracker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-image: url(https://imageio.forbes.com/specials-images/imageserve/6354154d5e097d68cc4360ba/Picture-shows-green-graph-line-in-front-of-quotation-board/960x0.jpg?format=jpg&width=960); margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333333;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            background-color: #008080;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            input[type="submit"]:hover {
+                background-color: #d5004e;
+            }
+
+        #bitcoinPrice {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 20px;
+            color: #ffffff;
+        }
+    </style>
+
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+    <h1>Bitcoin Price Tracker</h1>
+
+    <form id="registrationForm" onsubmit="return validateForm()">
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+
+        <input type="submit" value="Register">
+    </form>
+    <br /><br />
+    <div id="bitcoinPrice"></div>
+
+    <script>
+        function validateForm() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            var confirmPassword = document.getElementById("confirmPassword").value;
+            var email = document.getElementById("email").value;
+
+            if (username.length < 6) {
+                alert("Nazwa użytkownika musi mieć minimum 6 znaków");
+                return false;
+            }
+
+            if (password.length < 8) {
+                alert("Hasło musi mieć minimum 8 znaków");
+                return false;
+            }
+
+            if (!/\d/.test(password)) {
+                alert("Hasło musi zawierać co najmniej jedną liczbę");
+                return false;
+            }
+
+            if (!/[a-zA-Z]/.test(password)) {
+                alert("Hasło musi zawierać co najmniej jedną literę");
+                return false;
+            }
+
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                alert("Hasło musi zawierać co najmniej jeden znak specjalny");
+                return false;
+            }
+
+            if (password !== confirmPassword) {
+                alert("Hasło i potwierdzenie hasła nie są takie same");
+                return false;
+            }
+
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert("Nieprawidłowy adres email");
+                return false;
+            }
+
+            alert("Formularz został poprawnie zweryfikowany");
+            return true;
+        }
+
+        function fetchBitcoinPrice() {
+            fetch('https://api.coindesk.com/v1/bpi/currentprice/BTC.json')
+                .then(response => response.json())
+                .then(data => {
+                    var bitcoinPrice = data.bpi.USD.rate;
+                    document.getElementById("bitcoinPrice").textContent = `Aktualna cena Bitcoina: $${bitcoinPrice}`;
+                })
+                .catch(error => {
+                    console.log('Wystąpił błąd:', error);
+                });
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker zarejestrowany:', registration);
+                })
+                .catch(error => {
+                    console.log('Rejestracja Service Worker\'a nie powiodła się:', error);
+                });
+        }
+
+        fetchBitcoinPrice();
+    </script>
+</body>
+</html>
